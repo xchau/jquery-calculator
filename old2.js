@@ -22,14 +22,8 @@
   });
 
   // CALCULATE OUTPUT
-  $('div.buttons').on('click', '#equals', calculate);
-  $('html').on('keydown', (event) => {
-    if (event.key === 'Enter') {
-      calculate();
-    }
-  });
-
-   function calculate() {
+  $('div.buttons').on('click', '#equals', () => {
+    console.log(output);
     const regex = output.match(/(\-?\d*\.?\d*)(\+|\-|\÷|\x)(\-?\d*\.?\d*)/);
     console.log(regex);
     const regexPlus = /(\-?\d*\.?\d+)(\+)(\-?\d*\.?\d+)/.test(output);
@@ -78,7 +72,8 @@
       $screenSpan.text(output);
       $('div#screen').append($screenSpan);
     }
-  }
+
+  });
 
   // CLEAR SCREEN
   const $clear = $('div.buttons').children().eq(0);
@@ -86,13 +81,6 @@
   $clear.click(() => {
     output = '';
     $('div#screen').empty();
-  });
-
-  $('html').on('keydown', (event) => {
-    if (event.key === 'Backspace') {
-      output = '';
-      $('div#screen').empty();
-    }
   });
 
   // KEYDOWN EVENTS
@@ -115,5 +103,27 @@
           $('div#screen').append($screenSpan);
         }
       }
+
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
 })();
+
+// function makeNumClickEvent(number, childIndex) {
+//   const $number = $('div.buttons').children().eq(childIndex);
+//
+//   $('div.buttons').click('span', () => {
+//     output += $number.text()
+//   })
+// }
