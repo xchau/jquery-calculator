@@ -31,14 +31,13 @@
 
    function calculate() {
     const regex = output.match(/(\-?\d*\.?\d*)(\+|\-|\÷|\x)(\-?\d*\.?\d*)/);
-    console.log(regex);
     const regexPlus = /(\-?\d*\.?\d+)(\+)(\-?\d*\.?\d+)/.test(output);
     const regexMinus = /(\-?\d*\.?\d+)(\-)(\-?\d*\.?\d+)/.test(output);
     const regexMulti = /(\-?\d*\.?\d+)(\x)(\-?\d*\.?\d+)/.test(output);
     const regexDivide = /(\-?\d*\.?\d+)(\÷)(\-?\d*\.?\d+)/.test(output);
     // ADDITION
     if (regexPlus) {
-      output = parseFloat(regex[1]) + parseFloat(regex[3]);
+      output = parseFloat(regex[1]) + parseFloat(regex[3]).toFixed(6);
       $('div#screen').empty();
       $screenSpan.text(output);
       $('div#screen').append($screenSpan);
@@ -66,12 +65,12 @@
     }
     // DIVISION
     else if (regexDivide) {
-      output = parseFloat(regex[1]) / parseFloat(regex[3]);
+      output = (parseFloat(regex[1]) / parseFloat(regex[3])).toFixed(13);
       $('div#screen').empty();
       $screenSpan.text(output);
       $('div#screen').append($screenSpan);
     }
-    // DENOMINATOR IS ZERO
+    // NONSENSE INPUT
     else {
       output = 'ERROR';
       $('div#screen').empty();
