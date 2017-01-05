@@ -1,125 +1,143 @@
+/* eslint-disable no-multiple-empty-lines*/
 (function() {
   'use strict';
 
-  const $screenSpan = $('<span>');
-  let output = '';
+  const $screen = $('#screen');
+  let expression = '';
+  let total;
 
-  // DECIMAL BUTTON
-  $('l-row').children().eq(1).click((event) => {
-    const $target = $(event).target;
-
-    output += $target.text();
+  // CLEAR SCREEN
+  $('#clear').click(() => {
+    expression = '';
+    total = '';
+    $screen.text(expression);
   });
 
-  // DISPLAY NUMBERS & OPERATORS TO SCREEN
-  $('div.buttons').on('click', 'span', (event) => {
+  // DISPLAY NUMBERS & OPERATORS ON BUTTON CLICK
+  $('.buttons').on('click', 'span', (event) => {
     const $target = $(event.target);
 
     if ($target.is('#clear') || $target.is('#equals')) {
       return;
     }
-    output += $target.text();
-    $screenSpan.text(output);
-    $('div#screen').append($screenSpan);
+
+    // CLEAR SCREEN AFTER ERROR
+    // if ($screen.text() === 'Error') {
+    //   $('span').one('click', () => {
+    //     expression = '';
+    //     $screen.text(expression);
+    //   });
+    // }
+
+    expression += $target.text();
+    $screen.text(expression);
   });
 
-  // CALCULATE OUTPUT
   const calculate = function() {
-    const regex = output.match(/(-?\d*\.?\d*)(\+|-|÷|x)(-?\d*\.?\d*)/);
-    const regexPlus = /(-?\d*\.?\d+)(\+)(-?\d*\.?\d+)/.test(output);
-    const regexMinus = /(-?\d*\.?\d+)(-)(-?\d*\.?\d+)/.test(output);
-    const regexMulti = /(-?\d*\.?\d+)(x)(-?\d*\.?\d+)/.test(output);
-    const regexDivide = /(-?\d*\.?\d+)(÷)(-?\d*\.?\d+)/.test(output);
+    const regex = /^(\-?\d+\.?\d*)(\+|\-|x|÷)(\-?\d+\.?\d*)$/;
 
-    // ADDITION
-    if (regexPlus) {
-      output = parseFloat(regex[1]) + parseFloat(regex[3]);
-      $('div#screen').empty();
-      $screenSpan.text(output);
-      $('div#screen').append($screenSpan);
+    const expRegex = $screen.text().match(regex);
+
+    if (expRegex === null) {
+      expression = 'Error';
+      $screen.text(expression);
+
+      return;
     }
 
-    // SUBTRACTION
-    else if (regexMinus) {
-      output = parseFloat(regex[1]) - parseFloat(regex[3]);
-      $('div#screen').empty();
-      $screenSpan.text(output);
-      $('div#screen').append($screenSpan);
-    }
+    const operator = expRegex[2];
+    const value1 = parseFloat(expRegex[1]);
+    const value2 = parseFloat(expRegex[3]);
 
-    // MULTIPLICATION
-    else if (regexMulti) {
-      output = parseFloat(regex[1]) * parseFloat(regex[3]);
-      $('div#screen').empty();
-      $screenSpan.text(output);
-      $('div#screen').append($screenSpan);
+    if (operator === '+') {
+      total = value1 + value2;
     }
-
-    // DENOMINATOR IS ZERO
-    else if (regex[3] === 0) {
-      output = 'ERROR';
-      $('div#screen').empty();
-      $screenSpan.text(output);
-      $('div#screen').append($screenSpan);
+    else if (operator === '-') {
+      total = value1 - value2;
     }
-
-    // DIVISION
-    else if (regexDivide) {
-      output = (parseFloat(regex[1]) / parseFloat(regex[3])).toFixed(13);
-      $('div#screen').empty();
-      $screenSpan.text(output);
-      $('div#screen').append($screenSpan);
+    else if (operator === 'x') {
+      total = value1 * value2;
     }
+    else if (operator === '÷') {
+      if (value2 === 0) {
+        total = 'Error';
 
-    // NONSENSE INPUT
-    else {
-      output = 'ERROR';
-      $('div#screen').empty();
-      $screenSpan.text(output);
-      $('div#screen').append($screenSpan);
+        return;
+      }
+
+      total = value1 / value2;
     }
   };
 
-  $('div.buttons').on('click', '#equals', calculate);
-  $('html').on('keydown', (event) => {
-    if (event.key === 'Enter') {
-      calculate();
+  // EVALUATE ON CLICK EQUALS
+  $('#equals').click(() => {
+    if (expression === '') {
+      expression = 'Error';
+
+      return;
     }
-  });
 
-  // CLEAR SCREEN
-  const $clear = $('div.buttons').children().eq(0);
+    calculate();
 
-  $clear.click(() => {
-    output = '';
-    $('div#screen').empty();
-  });
-
-  $('html').on('keydown', (event) => {
-    if (event.key === 'Backspace') {
-      output = '';
-      $('div#screen').empty();
+    if (total === Math.round(total)) {
+      expression = total;
     }
-  });
-
-  // KEYDOWN EVENTS
-  $('html').on('keydown', (event) => {
-    if (/[0-9+-x/*]/.test(event.key)) {
-      if (event.key === '/') {
-        output += '÷';
-        $screenSpan.text(output);
-        $('div#screen').append($screenSpan);
+    else {
+      if (String(total).length <= 4) {
+        expression = total.toFixed(2);
       }
-      else if (event.key === '*') {
-        output += 'x';
-        $screenSpan.text(output);
-        $('div#screen').append($screenSpan);
+      else if (String(total).length <= 8) {
+        expression = total.toFixed(4);
       }
       else {
-        output += event.key;
-        $screenSpan.text(output);
-        $('div#screen').append($screenSpan);
+        expression = total.toFixed(8);
       }
+    }
+
+    $screen.text(expression);
+    expression = '';
+  });
+
+  $('html').on('keydown', (event) => {
+    if (/[0-9+\-x/*]/.test(event.key)) {
+      if (event.key === '/') {
+        expression += '÷';
+        $screen.text(expression);
+      }
+      else if (event.key === '*') {
+        expression += 'x';
+        $screen.text(expression);
+      }
+      else {
+        expression += event.key;
+        $screen.text(expression);
+      }
+    }
+    else if (event.key === 'Enter') {
+      calculate();
+
+      if (total === Math.round(total)) {
+        expression = total;
+      }
+      else {
+        if (String(total).length <= 4) {
+          expression = total.toFixed(2);
+        }
+        else if (String(total).length <= 8) {
+          expression = total.toFixed(4);
+        }
+        else {
+          expression = total.toFixed(8);
+        }
+      }
+
+      $screen.text(expression);
+      expression = '';
+    }
+    else if (event.key === 'Backspace') {
+      expression = '';
+      total = '';
+      $screen.text(expression);
     }
   });
 })();
